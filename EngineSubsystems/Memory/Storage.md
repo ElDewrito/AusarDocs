@@ -27,7 +27,6 @@ using System.Runtime.InteropServices;
 
 namespace TlsExample
 {
-	// error handling and other trivial implementation details left out for brevity
     unsafe class Program
     {
         [Flags]
@@ -146,27 +145,6 @@ namespace TlsExample
             Marshal.PtrToStructure(buf, info);
             Marshal.FreeHGlobal(buf);
             buf = IntPtr.Zero;
-
-            return info;
-        }
-
-        public ThreadBasicInformation GetMainHaloThreadInfo()
-        {
-            ThreadBasicInformation info = null;
-
-            var process = Process.GetProcessesByName("halo5forge").First();
-
-            foreach (ProcessThread thread in process.Threads)
-            {
-                if (thread.ThreadState != ThreadState.Running)
-                    continue;
-
-                var threadHandle = OpenThread(ThreadAccessFlags.All, false, (uint)thread.Id);
-                info = GetThreadInformation(threadHandle);
-                CloseHandle(threadHandle);
-
-                break;
-            }
 
             return info;
         }
