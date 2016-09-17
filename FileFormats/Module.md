@@ -82,8 +82,8 @@ Offset | Type | Name | Description
 0x0C | uint32 | `compressedSize` | The size of the compressed block.
 0x10 | uint32 | `uncompressedOffset` | The offset of the block's uncompressed data in the uncompressed file.
 0x14 | uint32 | `uncompressedSize` | The size of the block's data after it is uncompressed.
-0x18 | int32 | `unknown8` |
-0x1C | int32 | `unknown8` |
+0x18 | int32 | `unknown18` |
+0x1C | int32 | `unknown1C` |
 
 ## Compressed Data
 
