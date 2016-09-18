@@ -23,7 +23,7 @@ Offset | Type | Name | Description
 0x14 | int32 | `unknown14` |
 0x18 | int32 | `unknown18` |
 0x1C | int32 | `fileNamesSize` | Size of the filename data in the module
-0x20 | int32 | `numRootTags` | Number of top-level tags in the module
+0x20 | int32 | `numResources` | Number of resource files in the module
 0x24 | int32 | `numCompressedBlocks` | Number of compressed blocks in the module
 0x28 | uint8[0x10] | `unknown28` |
 
@@ -65,9 +65,9 @@ Offset | Type | Name | Description
 
 The filename data immediately follows the file list. It is simply a conglomeration of null-terminated ASCII strings. Offsets into this are stored in the `nameOffset` field of each file entry.
 
-## Root Tags
+## Resource List
 
-This root tag list immediately follows the filename data. It is a list of 4-byte file indices which represent the top-level tags in the module file.
+This resource list immediately follows the filename data. It is a list of 4-byte indices which point to files in the File List that contain resource data.
 
 ## Compressed Blocks
 
