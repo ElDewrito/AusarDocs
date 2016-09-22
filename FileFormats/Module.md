@@ -24,13 +24,13 @@ Offset | Type | Name | Description
 0x18 | int32 | `unknown18` |
 0x1C | int32 | `fileNamesSize` | Size of the filename data in the module
 0x20 | int32 | `numResources` | Number of resource files in the module
-0x24 | int32 | `numCompressedBlocks` | Number of compressed blocks in the module
-0x28 | uint8[0x10] | `unknown28` |
+0x24 | int32 | `numFileBlocks` | Number of file blocks in the module
+0x28 | uint64 | `unknown28` |
+0x30 | uint64 | `checksum` | MurmurHash3_128 of the header (set this field to 0 first), file list, resource list, and block list
 
 ## File List
 
-The file list immediately follows the header. It stores metadata for each file, including where the file is located in the module and how it is compressed.
-Files are compressed using zlib.
+The file list immediately follows the header. It stores metadata for each file, including where the file is located in the module and how it is stored.
 
 ### File Entry Structure (Size: 0x58)
 
@@ -40,19 +40,18 @@ Offset | Type | Name | Description
 0x04 | int32 | `parentFileIndex` | Used with resources to point back to the parent file. -1 = none
 0x08 | int32 | `unknown8` |
 0x0C | int32 | `unknownC` |
-0x10 | int32 | `compressedBlockCount` | The number of compressed blocks that make up the file. If this is 0, then just use totalCompressedSize and totalUncompressedSize as a block.
-0x14 | int32 | `firstCompressedBlockIndex` | The index of the first compressed block in the file.
-0x18 | uint64 | `compressedOffset` | The offset of the first compressed block in the file, relative to the start of the compressed data area in the module. This area follows the compressed block list.
+0x10 | int32 | `blockCount` | The number of blocks that make up the file. If this is 0, then just use totalCompressedSize and totalUncompressedSize as a block.
+0x14 | int32 | `firstBlockIndex` | The index of the first block in the file.
+0x18 | uint64 | `dataOffset` | The offset of the first block in the file, relative to the start of the data area in the module. This area follows the block list.
 0x20 | uint32 | `totalCompressedSize` | The total size of compressed data.
 0x24 | uint32 | `totalUncompressedSize` | The total size of the data after it is uncompressed. If this is 0, then the file is empty.
 0x28 | uint8 | `unknown28` |
 0x29 | uint8 | `unknown29` |
 0x2A | uint8 | `unknown2A` |
 0x2B | uint8 | `unknown2B` |
-0x2C | int32 | `unknown2C` |
-0x30 | int32 | `unknown30` |
-0x34 | int32 | `unknown34` |
-0x38 | uint64 | `unknown38` |
+0x2C | int32 | `globalTagId` | If the file is a tag, this is the global tag ID (-1 if none).
+0x30 | int64 | `sourceTagId` | If the file is a tag, this is the source tag ID (-1 if none).
+0x38 | uint64 | `unknown38` | _(Likely a MurmurHash checksum of the full file, need to double-check)_
 0x40 | int32 | `groupTag` | If the file is a tag, this holds the group tag of the file (e.g. `bipd`).
 0x44 | uint32 | `uncompressedHeaderSize` | The size of the file's uncompressed header.
 0x48 | uint32 | `uncompressedTagDataSize` | The size of the file's uncompressed tag data.
@@ -69,40 +68,41 @@ The filename data immediately follows the file list. It is simply a conglomerati
 
 This resource list immediately follows the filename data. It is a list of 4-byte indices which point to files in the File List that contain resource data.
 
-## Compressed Blocks
+## Block List
 
-The compressed block list immediately follows the root tag list. Each file is split into multiple blocks which are compressed individually, and this lists information about each block.
+The block list immediately follows the root tag list. Each file is split into multiple blocks which can be compressed individually, and this lists information about each block.
 
-### Compressed Block Structure (Size: 0x20)
+### Block Definition Structure (Size: 0x20)
 
 Offset | Type | Name | Description
 --- | --- | --- | ---
-0x00 | int64 | `unknown0` |
+0x00 | uint64 | `checksum` | Murmur3_128 hash of the uncompressed block data (the upper 64 bits are discarded)
 0x08 | uint32 | `compressedOffset` | The offset of this block relative to the start of the file's compressed data.
-0x0C | uint32 | `compressedSize` | The size of the compressed block.
+0x0C | uint32 | `compressedSize` | The size of the compressed data.
 0x10 | uint32 | `uncompressedOffset` | The offset of the block's uncompressed data in the uncompressed file.
 0x14 | uint32 | `uncompressedSize` | The size of the block's data after it is uncompressed.
-0x18 | int32 | `unknown18` |
-0x1C | int32 | `unknown1C` |
+0x18 | bool | `compressed` | `true` if the block data is compressed using ZLib, `false` if it should just be read verbatim
+0x1C | int32 | `padding1C` |
 
-## Compressed Data
+## File Data
 
-Following the compressed block list is the compressed data area of the module. This is where all compressed data lies.
+Following the block list is the data area of the module. This is where all file data lies.
 
 ## Steps to Extract a File
 
 These are the steps you need to take to fully extract a file from a module:
 
-1. Read the header, file list, filename data, root tag list, and compressed block list.
-2. The file pointer should now point to the start of the compressed data area. Save this value (we'll call it `compressedDataOffset`).
+1. Read the header, file list, filename data, root tag list, and block list.
+2. The file pointer should now point to the start of the data area. Save this value (we'll call it `dataOffset`).
 3. Go to the file's entry in the file list.
 4. If you need the file's name, retrieve it by reading the ASCII string at the file's `nameOffset` in the filename data.
 5. If the file's `totalUncompressedSize` is 0, then it is empty. Stop.
-6. Compute the offset of the first compressed block in the file as `firstCompressedBlockOffset = compressedDataOffset + file.compressedOffset`).
-7. Check the file's `compressedBlockCount`.
+6. Compute the offset of the first block in the file as `firstBlockOffset = dataOffset + file.dataOffset`).
+7. Check the file's `blockCount`.
   * If it's 0, then define a block using the file's `totalCompressedSize` and `totalUncompressedSize`.
-  * Otherwise, get its compressed blocks out of the compressed blocks list using the file's `firstCompressedBlockIndex` and `compressedBlockCount`.
-8. For each compressed block, seek to the offset `firstCompressedBlockOffset + block.compressedOffset` in the module file. Read `block.compressedSize` bytes and uncompress them using zlib.
+  * Otherwise, get its blocks out of the block list using the file's `firstBlockIndex` and `blockCount`.
+8. For each block, seek to the offset `firstBlockOffset + block.compressedOffset` in the module file. Read `block.compressedSize` bytes.
+  * If `block.compressed` is `true`, uncompress them using zlib.
 9. Copy each uncompressed block to the output buffer using the block's `uncompressedOffset` and `uncompressedSize`.
 
 You can see a sample implementation of this [here](https://github.com/Shockfire/FiveTool/blob/master/ModuleExtractor/main.cpp).
