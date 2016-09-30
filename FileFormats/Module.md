@@ -56,9 +56,10 @@ Offset | Type | Name | Description
 0x44 | uint32 | `uncompressedHeaderSize` | The size of the file's uncompressed header.
 0x48 | uint32 | `uncompressedTagDataSize` | The size of the file's uncompressed tag data.
 0x4C | uint32 | `uncompressedResourceDataSize` | The size of the file's uncompressed resource data.
-0x50 | int16 | `unknown50` |
-0x52 | int16 | `unknown52` |
-0x54 | int32 | `unknown54` |
+0x50 | int16 | `headerBlockCount` | Number of blocks that make up the file's header.
+0x52 | int16 | `tagDataBlockCount` | Number of blocks that make up the file's tag data.
+0x54 | int16 | `resourceBlockCount` | Number of blocks that make up the file's resource data.
+0x56 | int16 | `padding56` | _(Padding)_
 
 ## Filename Data
 
@@ -82,7 +83,7 @@ Offset | Type | Name | Description
 0x10 | uint32 | `uncompressedOffset` | The offset of the block's uncompressed data in the uncompressed file.
 0x14 | uint32 | `uncompressedSize` | The size of the block's data after it is uncompressed.
 0x18 | bool | `compressed` | `true` if the block data is compressed using ZLib, `false` if it should just be read verbatim
-0x1C | int32 | `padding1C` |
+0x1C | int32 | `padding1C` | _(Padding)_
 
 ## File Data
 
