@@ -38,8 +38,8 @@ Offset | Type | Name | Description
 --- | --- | --- | ---
 0x00 | int32 | `nameOffset` | Offset of the filename in the filename data
 0x04 | int32 | `parentFileIndex` | Used with resources to point back to the parent file. -1 = none
-0x08 | int32 | `unknown8` |
-0x0C | int32 | `unknownC` |
+0x08 | int32 | `resourceCount` | Number of resources this file owns
+0x0C | int32 | `firstResourceIndex` | Index of the first resource in the module's resource list that this file owns (see the Resource List section below).
 0x10 | int32 | `blockCount` | The number of blocks that make up the file. If this is 0, then just use totalCompressedSize and totalUncompressedSize as a block.
 0x14 | int32 | `firstBlockIndex` | The index of the first block in the file.
 0x18 | uint64 | `dataOffset` | The offset of the first block in the file, relative to the start of the data area in the module. This area follows the block list.
