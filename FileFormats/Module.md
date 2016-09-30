@@ -26,7 +26,7 @@ Offset | Type | Name | Description
 0x20 | int32 | `numResources` | Number of resource files in the module
 0x24 | int32 | `numFileBlocks` | Number of file blocks in the module
 0x28 | uint64 | `unknown28` |
-0x30 | uint64 | `checksum` | MurmurHash3_128 of the header (set this field to 0 first), file list, resource list, and block list
+0x30 | uint64 | `checksum` | Murmur3_x64_128 of the header (set this field to 0 first), file list, resource list, and block list
 
 ## File List
 
@@ -51,7 +51,7 @@ Offset | Type | Name | Description
 0x2B | uint8 | `unknown2B` |
 0x2C | int32 | `globalTagId` | The global tag ID (-1 if not a tag).
 0x30 | int64 | `assetId` | The asset ID (-1 if not a tag).
-0x38 | uint64 | `unknown38` | _(Likely a MurmurHash checksum of the full file, need to double-check)_
+0x38 | uint64 | `assetChecksum` | Murmur3_x64_128 hash of (what appears to be) the original file that this file was built from. Only used if `blockCount` is 0 (because otherwise there's no way to compute it).
 0x40 | int32 | `groupTag` | If the file is a tag, this holds the group tag of the file (e.g. `bipd`).
 0x44 | uint32 | `uncompressedHeaderSize` | The size of the file's uncompressed header.
 0x48 | uint32 | `uncompressedTagDataSize` | The size of the file's uncompressed tag data.
@@ -77,7 +77,7 @@ The block list immediately follows the root tag list. Each file is split into mu
 
 Offset | Type | Name | Description
 --- | --- | --- | ---
-0x00 | uint64 | `checksum` | Murmur3_128 hash of the uncompressed block data (the upper 64 bits are discarded)
+0x00 | uint64 | `checksum` | Murmur3_x64_128 hash of the uncompressed block data (the upper 64 bits are discarded)
 0x08 | uint32 | `compressedOffset` | The offset of this block relative to the start of the file's compressed data.
 0x0C | uint32 | `compressedSize` | The size of the compressed data.
 0x10 | uint32 | `uncompressedOffset` | The offset of the block's uncompressed data in the uncompressed file.
