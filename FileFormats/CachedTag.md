@@ -81,8 +81,8 @@ Offset | Type | Name | Description
 --- | --- | --- | ---
 0x00 | int32 | `groupTag` | Group tag (e.g. `'proj'`).
 0x04 | uint32 | `nameOffset` | Offset of the tag filename in the String Table.
-0x08 | uint64 | `sourceId` | *Shockfire: I'm not entirely sure what this field does. It's definitely some sort of ID value, but it doesn't seem to be used at runtime at all from what I've found. What's interesting is that while most tags have a somewhat low number for this (e.g. 0x3D851D), tags which are generated at build time have this set to a completely random value (e.g. 0x9E08CF661C8A860F). This leads me to assume that it's an ID number which is used by the editor tools. Because of this I'm going to name it the "source ID" for now.*
-0x10 | uint32 | `globalId` | Global tag ID.
+0x08 | int64 | `assetId` | Asset ID of the tag.
+0x10 | int32 | `globalId` | Global ID of the tag.
 0x14 | int32 | `unknown14` |
 
 ## Data Block List
@@ -266,8 +266,8 @@ Offset | Type | Name | Description
 --- | --- | --- | ---
 0x00 | uint64 | `typeInfo` | Runtime: pointer to type information.
 0x08 | uint32 | `nameLength` | Length of the tag's name in characters.
-0x0C | uint32 | `globalId` | Global ID of the tag.
-0x10 | uint64 | `sourceId` | Source ID of the tag. (See the Tag Dependency List for more info on this.)
+0x0C | int32 | `globalId` | Global ID of the tag.
+0x10 | int64 | `assetId` | Asset ID of the tag.
 0x18 | int32 | `groupTag` | Group tag (e.g. `proj`).
 0x1C | int32 | `localHandle` | Runtime: the resolved local tag handle.
 

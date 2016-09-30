@@ -49,8 +49,8 @@ Offset | Type | Name | Description
 0x29 | uint8 | `unknown29` |
 0x2A | uint8 | `unknown2A` |
 0x2B | uint8 | `unknown2B` |
-0x2C | int32 | `globalTagId` | If the file is a tag, this is the global tag ID (-1 if none).
-0x30 | int64 | `sourceTagId` | If the file is a tag, this is the source tag ID (-1 if none).
+0x2C | int32 | `globalTagId` | The global tag ID (-1 if not a tag).
+0x30 | int64 | `assetId` | The asset ID (-1 if not a tag).
 0x38 | uint64 | `unknown38` | _(Likely a MurmurHash checksum of the full file, need to double-check)_
 0x40 | int32 | `groupTag` | If the file is a tag, this holds the group tag of the file (e.g. `bipd`).
 0x44 | uint32 | `uncompressedHeaderSize` | The size of the file's uncompressed header.
