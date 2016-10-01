@@ -19,7 +19,7 @@ Offset | Type | Name | Description
 0x04 | int32 | `version` | 27 (0x1B)
 0x08 | uint64 | `id` | Unique module ID number
 0x10 | int32 | `numFiles` | Number of files stored in the module
-0x14 | int32 | `loadedTagCount` | Number of tags in the load manifest (0 if the module doesn't have one)
+0x14 | int32 | `numLoadedTags` | Number of tags in the load manifest (0 if the module doesn't have one)
 0x18 | int32 | `firstResourceIndex` | Index of the first resource entry (`numFiles` - `numResources`)
 0x1C | int32 | `fileNamesSize` | Size of the filename data in the module
 0x20 | int32 | `numResources` | Number of resource files in the module
