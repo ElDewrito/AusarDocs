@@ -19,12 +19,12 @@ Offset | Type | Name | Description
 0x04 | int32 | `version` | 27 (0x1B)
 0x08 | uint64 | `id` | Unique module ID number
 0x10 | int32 | `numFiles` | Number of files stored in the module
-0x14 | int32 | `unknown14` |
+0x14 | int32 | `loadedTagCount` | Number of tags in the load manifest (0 if the module doesn't have one)
 0x18 | int32 | `firstResourceIndex` | Index of the first resource entry (`numFiles` - `numResources`)
 0x1C | int32 | `fileNamesSize` | Size of the filename data in the module
 0x20 | int32 | `numResources` | Number of resource files in the module
 0x24 | int32 | `numFileBlocks` | Number of file blocks in the module
-0x28 | uint64 | `unknown28` | _(Always seems to be `0xC631DDD9825AF534`)_
+0x28 | uint64 | `buildVersionId` | _(This is always `0xC631DDD9825AF534` and it's not used at runtime, so calling it the build version ID is the best we can do right now)_
 0x30 | uint64 | `checksum` | Murmur3_x64_128 of the header (set this field to 0 first), file list, resource list, and block list
 
 ## File List
