@@ -45,9 +45,9 @@ Offset | Type | Name | Description
 0x18 | uint64 | `dataOffset` | The offset of the first block in the file, relative to the start of the data area in the module. This area follows the block list.
 0x20 | uint32 | `totalCompressedSize` | The total size of compressed data.
 0x24 | uint32 | `totalUncompressedSize` | The total size of the data after it is uncompressed. If this is 0, then the file is empty.
-0x28 | uint8 | `unknown28` |
-0x29 | uint8 | `unknown29` |
-0x2A | uint8 | `unknown2A` |
+0x28 | uint8 | `headerAlignment` | Power of 2 to align the header buffer to (e.g. 4 = align to a multiple of 16 bytes).
+0x29 | uint8 | `tagDataAlignment` | Power of 2 to align the tag data buffer to.
+0x2A | uint8 | `resourceDataAlignment` | Power of 2 to align the resource data buffer to.
 0x2B | uint8 | `unknown2B` |
 0x2C | int32 | `globalTagId` | The global tag ID (-1 if not a tag).
 0x30 | int64 | `assetId` | The asset ID (-1 if not a tag).
