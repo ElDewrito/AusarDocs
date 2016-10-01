@@ -40,18 +40,18 @@ Offset | Type | Name | Description
 0x04 | int32 | `parentFileIndex` | Used with resources to point back to the parent file. -1 = none
 0x08 | int32 | `resourceCount` | Number of resources this file owns
 0x0C | int32 | `firstResourceIndex` | Index of the first resource in the module's resource list that this file owns (see the Resource List section below).
-0x10 | int32 | `blockCount` | The number of blocks that make up the file. If this is 0, then just use totalCompressedSize and totalUncompressedSize as a block.
-0x14 | int32 | `firstBlockIndex` | The index of the first block in the file.
+0x10 | int32 | `blockCount` | The number of blocks that make up the file. Only valid if the `HasBlocks` flag is set (see below).
+0x14 | int32 | `firstBlockIndex` | The index of the first block in the file. Only valid if the `HasBlocks` flag is set (see below).
 0x18 | uint64 | `dataOffset` | The offset of the first block in the file, relative to the start of the data area in the module. This area follows the block list.
 0x20 | uint32 | `totalCompressedSize` | The total size of compressed data.
 0x24 | uint32 | `totalUncompressedSize` | The total size of the data after it is uncompressed. If this is 0, then the file is empty.
 0x28 | uint8 | `headerAlignment` | Power of 2 to align the header buffer to (e.g. 4 = align to a multiple of 16 bytes).
 0x29 | uint8 | `tagDataAlignment` | Power of 2 to align the tag data buffer to.
 0x2A | uint8 | `resourceDataAlignment` | Power of 2 to align the resource data buffer to.
-0x2B | uint8 | `unknown2B` |
+0x2B | uint8 | `flags` | See "File Entry Flags" below.
 0x2C | int32 | `globalTagId` | The global tag ID (-1 if not a tag).
 0x30 | int64 | `assetId` | The asset ID (-1 if not a tag).
-0x38 | uint64 | `assetChecksum` | Murmur3_x64_128 hash of (what appears to be) the original file that this file was built from. Only used if `blockCount` is 0 (because otherwise there's no way to compute it).
+0x38 | uint64 | `assetChecksum` | Murmur3_x64_128 hash of (what appears to be) the original file that this file was built from. This is not always the same thing as the file stored in the module. Only verified if the `HasBlocks` flag is not set.
 0x40 | int32 | `groupTag` | If the file is a tag, this holds the group tag of the file (e.g. `bipd`).
 0x44 | uint32 | `uncompressedHeaderSize` | The size of the file's uncompressed header.
 0x48 | uint32 | `uncompressedTagDataSize` | The size of the file's uncompressed tag data.
@@ -60,6 +60,16 @@ Offset | Type | Name | Description
 0x52 | int16 | `tagDataBlockCount` | Number of blocks that make up the file's tag data.
 0x54 | int16 | `resourceBlockCount` | Number of blocks that make up the file's resource data.
 0x56 | int16 | `padding56` | _(Padding)_
+
+### File Entry Flags
+
+Each entry has a flags field which describes how the file is stored in the module. See the value at offset 0x2B.
+
+Bit | Name | Description
+--- | --- | ---
+0 | `Compressed` | The file uses compression.
+1 | `HasBlocks` | The `blockCount` and `firstBlockIndex` fields are valid. If this is not set, then the file only has one block which can be inferred from the fields in the struct.
+2 | `RawFile` | The file is not split into header/tag data/resource sections and should be read in its entirety.
 
 ## Filename Data
 
@@ -99,9 +109,9 @@ These are the steps you need to take to fully extract a file from a module:
 4. If you need the file's name, retrieve it by reading the ASCII string at the file's `nameOffset` in the filename data.
 5. If the file's `totalUncompressedSize` is 0, then it is empty. Stop.
 6. Compute the offset of the first block in the file as `firstBlockOffset = dataOffset + file.dataOffset`).
-7. Check the file's `blockCount`.
-  * If it's 0, then define a block using the file's `totalCompressedSize` and `totalUncompressedSize`.
-  * Otherwise, get its blocks out of the block list using the file's `firstBlockIndex` and `blockCount`.
+7. Check the file's `HasBlocks` flag.
+  * If 0, then define a block using the relevant fields in the file struct. Make sure to check the `Compressed` flag!
+  * If 1, then get its blocks out of the block list using the file's `firstBlockIndex` and `blockCount`.
 8. For each block, seek to the offset `firstBlockOffset + block.compressedOffset` in the module file. Read `block.compressedSize` bytes.
   * If `block.compressed` is `true`, uncompress them using zlib.
 9. Copy each uncompressed block to the output buffer using the block's `uncompressedOffset` and `uncompressedSize`.
