@@ -19,7 +19,7 @@ Offset | Type | Name | Description
 0x04 | int32 | `version` | 27 (0x1B)
 0x08 | uint64 | `id` | Unique module ID number
 0x10 | int32 | `numFiles` | Number of files stored in the module
-0x14 | int32 | `numLoadedTags` | Number of tags in the load manifest (0 if the module doesn't have one)
+0x14 | int32 | `numLoadedTags` | Number of tags in the load manifest (0 if the module doesn't have one, see the "Load Manifest" section below)
 0x18 | int32 | `firstResourceIndex` | Index of the first resource entry (`numFiles` - `numResources`)
 0x1C | int32 | `fileNamesSize` | Size of the filename data in the module
 0x20 | int32 | `numResources` | Number of resource files in the module
@@ -98,11 +98,17 @@ Offset | Type | Name | Description
 
 Following the block list is the data area of the module. This is where all file data lies.
 
+## Load Manifest
+
+Module files for maps in the "any" platform have a file inside them named "loadmanifest" (and it _probably_ has to be the first file in the module). This file just contains an array of global IDs of tags to load. The size of the array is stored in the `numLoadedTags` field in the module header.
+
+It's possible that simply appending to this file could allow a tag to load, but it hasn't been confirmed yet.
+
 ## Steps to Extract a File
 
 These are the steps you need to take to fully extract a file from a module:
 
-1. Read the header, file list, filename data, root tag list, and block list.
+1. Read the header, file list, filename data, resource list, and block list.
 2. The file pointer should now point to the start of the data area. Save this value (we'll call it `dataOffset`).
 3. Go to the file's entry in the file list.
 4. If you need the file's name, retrieve it by reading the ASCII string at the file's `nameOffset` in the filename data.
