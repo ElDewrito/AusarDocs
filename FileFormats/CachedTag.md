@@ -20,7 +20,7 @@ It is important to understand these differences in order to work with tag data e
 * Tag data is now broken into separate blocks. All addressing is done through a block index and an offset into the block.
 * Tags are identified at load time through a "global ID" and at runtime by a separate auto-generated "local handle". The process for generating the local handle has not been determined yet.
 * Every tag has its own string table which is used to store referenced tag names and `string_id` values.
-* `string_id` values are now Murmur3_32 hashes of their strings (instead of set/index pairs).
+* `string_id` values are now Murmur3_32 hashes of their strings (instead of namespace+index pairs).
 * The structures of many tag fields (tag blocks, data references, tag references, paged resource references) have changed significantly. Do not make _any_ assumptions about their structures without reading this document first. For example, tag references are no longer 16 bytes large and the group tag is no longer at the beginning. The new structures are documented below.
 
 ## General File Layout
