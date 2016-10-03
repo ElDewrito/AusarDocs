@@ -252,7 +252,7 @@ Data reference fields point to arbitrary data. On disk, they don't actually stor
 
 Offset | Type | Name | Description
 --- | --- | --- | ---
-0x00 | uint64 | `data` | Runtime: pointer to the block containing the first struct.
+0x00 | uint64 | `data` | Runtime: pointer to the referenced data.
 0x08 | uint64 | `typeInfo` | Runtime: pointer to type information.
 0x10 | int32 | `unknown10` | *(Unused?)*
 0x14 | int32 | `unknown14` | *(Unused?)*
