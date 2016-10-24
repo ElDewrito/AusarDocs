@@ -51,9 +51,11 @@ The file header is primarily responsible for holding the lengths of all of the s
 
 Offset | Type | Name | Description
 --- | --- | --- | ---
-0x00 | int32 | `magic` | `'hscu'` (UCSH = "UnCompreSsed Header"?)
+0x00 | int32 | `magic` | `'hscu'` (UCSH = "Universal Cache Storage Header"?)
 0x04 | int32 | `version` | 27 (0x1B)
-0x08 | uint8[0x14] | `unknown8` | *(Possibly a SHA-1 hash, really need to look into this)*
+0x08 | uint64 | `unknown8` |
+0x10 | uint64 | `assetChecksum` | Murmur3_x64_128 hash of (what appears to be) the original file that this file was built from. This is not always the same thing as the file stored in the module.
+0x18 | int32 | `unknown18` |
 0x1C | int32 | `dependencyCount` | Number of tag dependencies
 0x20 | int32 | `dataBlockCount` | Number of data blocks
 0x24 | int32 | `tagStructCount` | Number of tag structs
@@ -65,9 +67,9 @@ Offset | Type | Name | Description
 0x3C | uint32 | `headerSize` | Header size in bytes
 0x40 | uint32 | `dataSize` | Tag data size in bytes
 0x44 | uint32 | `resourceDataSize` | Resource data size in bytes
-0x48 | int8 | `unknown48` |
-0x49 | int8 | `unknown49` |
-0x4A | int8 | `unknown4A` |
+0x48 | int8 | `headerAlignment` | Power of 2 to align the header buffer to (e.g. 4 = align to a multiple of 16 bytes).
+0x49 | int8 | `tagDataAlignment` | Power of 2 to align the tag data buffer to.
+0x4A | int8 | `resourceDataAlignment` | Power of 2 to align the resource data buffer to.
 0x4B | int8 | `unknown4B` |
 0x4C | int32 | `unknown4C` |
 
@@ -83,20 +85,20 @@ Offset | Type | Name | Description
 0x04 | uint32 | `nameOffset` | Offset of the tag filename in the String Table.
 0x08 | int64 | `assetId` | Asset ID of the tag.
 0x10 | int32 | `globalId` | Global ID of the tag.
-0x14 | int32 | `unknown14` |
+0x14 | int32 | `unknown14` | _(Haven't seen this be anything other than -1 yet)_
 
 ## Data Block List
 
-The data block list is a list of all the tag data blocks. This is used to locate each block within the tag data section of the file.
+The data block list is a list of all the tag data blocks. This is used to locate each block within the file.
 
 ### Data Block Definition Structure (Size = 0x10)
 
 Offset | Type | Name | Description
 --- | --- | --- | ---
 0x00 | uint32 | `size` | The size of the data block in bytes.
-0x04 | int16 | `unknown4` |
-0x06 | int16 | `unknown6` |
-0x08 | uint64 | `offset` | The offset of the start of the data block, relative to the start of the tag data section of the file.
+0x04 | int16 | `unknown4` | _(0 - 14, probably an enum)_
+0x06 | enum16 | `section` | 0 = Header, 1 = Tag Data, 2 = Resource Data
+0x08 | uint64 | `offset` | The offset of the start of the data block, relative to the start of its section.
 
 ## Tag Struct List
 
